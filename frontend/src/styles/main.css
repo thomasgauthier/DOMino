@@ -1,0 +1,29 @@
+html,
+body {
+    height: 100vh;
+    margin: 0;
+}
+
+.editor-parent {
+    height: 100%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+.yellow-highlight{
+    background-color: yellow;
+}
+
+.main {
+    height: 100%;
+    display: flex;
+    flex-direction:row;
+}
+
+.main>* {
+    width: 50%;
+}
+
+.game {
+    height: 100%;
+}

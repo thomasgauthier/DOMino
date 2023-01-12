@@ -1,0 +1,11 @@
+{
+  "name": "DOMino",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build" : "pnpm --stream -r build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

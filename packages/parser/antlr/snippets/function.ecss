@@ -1,0 +1,3 @@
+[player][velocity-x=?vx] {
+    velocity-x : max(?vx, (3 + 2) * 4);
+}
