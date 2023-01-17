@@ -111,10 +111,9 @@ function Main() {
             </x-entity>
 
             <x-entity sprite='{"stringmapid":"sprites/thwomp.png"}' speed='{"value":0.5}' scale='{"scale": 1}'
-                position='{"x":0,"y":0}' dimension='{"width":50,"height":50}' thwomp='{"is":true}' rigidbody='{}' velocity='{}'>
+               controller='{}' position='{"x":0,"y":0}' dimension='{"width":32,"height":32}' mario='{"is":true}' rigidbody='{}' velocity='{}'>
             </x-entity>
 
-            <x-entity controller='{}'></x-entity>
 
             <x-entity global='{}'></x-entity>
 

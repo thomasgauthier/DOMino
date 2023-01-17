@@ -10,14 +10,14 @@ body {
     overflow-x: hidden;
 }
 
-.yellow-highlight{
+.yellow-highlight {
     background-color: yellow;
 }
 
 .main {
     height: 100%;
     display: flex;
-    flex-direction:row;
+    flex-direction: row;
 }
 
 .main>* {
@@ -26,4 +26,9 @@ body {
 
 .game {
     height: 100%;
+}
+
+canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
