@@ -83,7 +83,7 @@ export default (world: IWorld, width: number, height: number) => {
                 }
 
                 if (hasComponent(world, Velocity, eid)) {
-                    const x = Velocity.x[eid]
+                    const x = Velocity.x[eid];
                     const absX = Math.abs(x);
 
                     const valX = Math.sign(x) * (absX < 0.001 ? 0 : absX)

@@ -4,6 +4,7 @@ import {
     getAllEntities,
     Component,
     defineComponent,
+    removeComponent,
 } from 'bitecs'
 import Components, { dimension as Dimension, position as Position, timescale as Timescale, rigidbody as Rigidbody, velocity as Velocity, debugstring as Debugstring } from './components';
 import setupRenderSystem from "./systems/canvasRenderer"
@@ -62,6 +63,13 @@ export default function createEngine(canvas: HTMLCanvasElement, callbacks: {
                 return new Set(query(world))
             }
         },
+        removeComponent: (component: Component, eid: number) => {
+            setTimeout(() => {
+                removeComponent(world, component, eid)
+            }, 0);
+
+            ; (async () => await Promise.resolve())()
+        },
         defineComponent: (schema: Schema) => {
             return defineComponent(schema);
         },
@@ -79,11 +87,17 @@ export default function createEngine(canvas: HTMLCanvasElement, callbacks: {
         let lastTime = performance.now();
 
 
-        const innerLoop = () => {
-            const now = performance.now();
+        const innerLoop = async () => {
+            setTimeout(() => { }, 0)
+            let now = performance.now();
             const timeScale = timesScaleQuery(world).reduce((acc, val) => Timescale.timescale[val], 1)
 
-            const dt = (now - lastTime) * timeScale;
+            let dt = (now - lastTime) * timeScale;
+            while (dt < 16.666666667 && keepLooping) {
+                now = performance.now();
+                dt = (now - lastTime) * timeScale;
+                await Promise.resolve()
+            }
 
             let clears = renderSystem(world);
             physicsSystem(dt);

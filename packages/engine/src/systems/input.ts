@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, hasComponent, IWorld, removeComponent } from "bitecs";
-import { controller as Input, arrowdown, arrowleft, arrowright, arrowup } from "../components";
+import { controller as Input, arrowdown, arrowleft, arrowright, arrowup, abutton, bbutton } from "../components";
 import queryLifecycle from "../queryLifecycle";
 import stringmap from "../stringmap";
 import EventEmitter from 'eventemitter3'
@@ -12,7 +12,9 @@ let events = {
     up: false,
     down: false,
     left: false,
-    right: false
+    right: false,
+    A: false,
+    B: false,
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,6 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (e.key === 'ArrowRight') {
             events.right = true;
         }
+
+        if(e.key === 'z') {
+            events.A = true;
+        }
+        if(e.key === 'x' || e.key === 'Shift') {
+            events.B = true;
+        }
     })
 
     document.addEventListener('keyup', (e) => {
@@ -46,6 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (e.key === 'ArrowRight') {
             events.right = false;
         }
+
+        if(e.key === 'z') {
+            events.A = false;
+        }
+
+        if(e.key === 'x' && !e.shiftKey) {
+            events.B = false;
+        }
+
+        if(e.key === 'Shift'){
+            events.B = false;
+        }
+
     })
 })
 
@@ -88,6 +110,32 @@ export default function (world: IWorld) {
             }
         } else {
             removeComponent(world, arrowright, entity)
+        }
+
+
+        if (events.right) {
+            if (!hasComponent(world, arrowright, entity)) {
+                addComponent(world, arrowright, entity)
+            }
+        } else {
+            removeComponent(world, arrowright, entity)
+        }
+
+
+        if (events.A) {
+            if (!hasComponent(world, abutton, entity)) {
+                addComponent(world, abutton, entity)
+            }
+        } else {
+            removeComponent(world, abutton, entity)
+        }
+
+        if (events.B) {
+            if (!hasComponent(world, bbutton, entity)) {
+                addComponent(world, bbutton, entity)
+            }
+        } else {
+            removeComponent(world, bbutton, entity)
         }
     }
 }
