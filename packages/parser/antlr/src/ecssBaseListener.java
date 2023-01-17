@@ -183,6 +183,18 @@ public class ecssBaseListener implements ecssListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterComponentAttributeComparator(ecssParser.ComponentAttributeComparatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComponentAttributeComparator(ecssParser.ComponentAttributeComparatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterComponentAttributeValue(ecssParser.ComponentAttributeValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -262,6 +274,18 @@ public class ecssBaseListener implements ecssListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFunction(ecssParser.FunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunctionName(ecssParser.FunctionNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunctionName(ecssParser.FunctionNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

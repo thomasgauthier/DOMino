@@ -17,6 +17,7 @@ import { SetOperatorAnyContext } from "./ecssParser";
 import { ComponentAsContext } from "./ecssParser";
 import { ComponentAttributesContext } from "./ecssParser";
 import { ComponentAttributeContext } from "./ecssParser";
+import { ComponentAttributeComparatorContext } from "./ecssParser";
 import { ComponentAttributeValueContext } from "./ecssParser";
 import { VarContext } from "./ecssParser";
 import { QueryvarContext } from "./ecssParser";
@@ -24,6 +25,7 @@ import { SystemBodyContext } from "./ecssParser";
 import { ComponentStatementsContext } from "./ecssParser";
 import { ComponentStatementContext } from "./ecssParser";
 import { FunctionContext } from "./ecssParser";
+import { FunctionNameContext } from "./ecssParser";
 import { FunctionParametersContext } from "./ecssParser";
 import { MathoperatoradditionsContext } from "./ecssParser";
 import { MathoperatorfactorsContext } from "./ecssParser";
@@ -161,6 +163,13 @@ export interface ecssVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitComponentAttribute?: (ctx: ComponentAttributeContext) => Result;
 
 	/**
+	 * Visit a parse tree produced by `ecssParser.componentAttributeComparator`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitComponentAttributeComparator?: (ctx: ComponentAttributeComparatorContext) => Result;
+
+	/**
 	 * Visit a parse tree produced by `ecssParser.componentAttributeValue`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -208,6 +217,13 @@ export interface ecssVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitFunction?: (ctx: FunctionContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `ecssParser.functionName`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunctionName?: (ctx: FunctionNameContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `ecssParser.functionParameters`.

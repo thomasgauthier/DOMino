@@ -147,6 +147,16 @@ public interface ecssListener extends ParseTreeListener {
 	 */
 	void exitComponentAttribute(ecssParser.ComponentAttributeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ecssParser#componentAttributeComparator}.
+	 * @param ctx the parse tree
+	 */
+	void enterComponentAttributeComparator(ecssParser.ComponentAttributeComparatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ecssParser#componentAttributeComparator}.
+	 * @param ctx the parse tree
+	 */
+	void exitComponentAttributeComparator(ecssParser.ComponentAttributeComparatorContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ecssParser#componentAttributeValue}.
 	 * @param ctx the parse tree
 	 */
@@ -216,6 +226,16 @@ public interface ecssListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFunction(ecssParser.FunctionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ecssParser#functionName}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionName(ecssParser.FunctionNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ecssParser#functionName}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionName(ecssParser.FunctionNameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ecssParser#functionParameters}.
 	 * @param ctx the parse tree

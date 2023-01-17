@@ -17,6 +17,7 @@ import { SetOperatorAnyContext } from "./ecssParser";
 import { ComponentAsContext } from "./ecssParser";
 import { ComponentAttributesContext } from "./ecssParser";
 import { ComponentAttributeContext } from "./ecssParser";
+import { ComponentAttributeComparatorContext } from "./ecssParser";
 import { ComponentAttributeValueContext } from "./ecssParser";
 import { VarContext } from "./ecssParser";
 import { QueryvarContext } from "./ecssParser";
@@ -24,6 +25,7 @@ import { SystemBodyContext } from "./ecssParser";
 import { ComponentStatementsContext } from "./ecssParser";
 import { ComponentStatementContext } from "./ecssParser";
 import { FunctionContext } from "./ecssParser";
+import { FunctionNameContext } from "./ecssParser";
 import { FunctionParametersContext } from "./ecssParser";
 import { MathoperatoradditionsContext } from "./ecssParser";
 import { MathoperatorfactorsContext } from "./ecssParser";
@@ -214,6 +216,17 @@ export interface ecssListener extends ParseTreeListener {
 	exitComponentAttribute?: (ctx: ComponentAttributeContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `ecssParser.componentAttributeComparator`.
+	 * @param ctx the parse tree
+	 */
+	enterComponentAttributeComparator?: (ctx: ComponentAttributeComparatorContext) => void;
+	/**
+	 * Exit a parse tree produced by `ecssParser.componentAttributeComparator`.
+	 * @param ctx the parse tree
+	 */
+	exitComponentAttributeComparator?: (ctx: ComponentAttributeComparatorContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `ecssParser.componentAttributeValue`.
 	 * @param ctx the parse tree
 	 */
@@ -289,6 +302,17 @@ export interface ecssListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFunction?: (ctx: FunctionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `ecssParser.functionName`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionName?: (ctx: FunctionNameContext) => void;
+	/**
+	 * Exit a parse tree produced by `ecssParser.functionName`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionName?: (ctx: FunctionNameContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `ecssParser.functionParameters`.

@@ -2,7 +2,7 @@ import { ANTLRInputStream, CommonTokenStream, RecognitionException, Recognizer }
 import { visitProgram } from "./AstBuilder"
 
 import { ecssLexer } from "./antlr/ecssLexer"
-import { ecssParser } from "./antlr/ecssParser"
+import { ecssParser, ProgramContext } from "./antlr/ecssParser"
 import { createErr, Err, Ok } from "option-t/cjs/PlainResult"
 import { Program } from "./ast-types";
 import lineColumn from "line-column"

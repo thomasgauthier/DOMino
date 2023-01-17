@@ -6,18 +6,9 @@ system: systemHeader systemBody;
 
 systemHeader: queryExpression;
 
-//componentAttributes componentEvents;
-
-// componentQueries: (componentQuery+ | modifiedComponentQuery);
 componentSelector:
 	LBRACKET (componentId | componentAs | componentAttribute) RBRACKET;
-// boundedSelector: queryvar componentSelector+; modifiedComponentQuery: (setoperator '('
-// componentQuery+ ')'); componentQuery: modifiedComponentQuery? selector modifiedComponentQuery*;
-// selector: boundedSelector | componentSelector;
 componentId: Identifier;
-
-// queryExpression: queryTerm (setoperator LPAREN queryTerm RPAREN)*; queryTerm: queryFactor
-// (setoperator LPAREN queryFactor RPAREN)*; queryFactor: componentSelector+;
 
 queryExpression:
 	intersectionQuery? (
@@ -27,9 +18,6 @@ queryOperationParameters: (intersectionQuery | queryExpression) (
 		',' (intersectionQuery | queryExpression)
 	)*;
 intersectionQuery: componentSelector+;
-// queryExpression: (','? (intersectionQuery | componentSelector)) | queryOperation;
-// intersectionQuery: componentSelector+; queryOperation: intersectionQuery? ((setoperator
-// setOperation))+; setOperation: '(' queryExpression* ')';
 
 setoperator: setOperatorNot | setOperatorAny;
 setOperatorNot: ':not';
@@ -39,7 +27,8 @@ componentAs: (componentId 'as' componentId);
 
 componentAttributes:
 	componentAttribute (COMMA componentAttribute)*;
-componentAttribute: componentId ASSIGN componentAttributeValue;
+componentAttribute: componentId componentAttributeComparator componentAttributeValue;
+componentAttributeComparator: ASSIGN | LESSTHAN | GREATERTHAN | LESSTHANOREQUAL | GREATERTHANOREQUAL;
 componentAttributeValue: NUMBER | Identifier | queryvar;
 
 var: DOLLAR Identifier;
@@ -50,19 +39,29 @@ systemBody:
 
 componentStatements: componentStatement+;
 componentStatement:
-	componentId COLON (function | expression) SEMI;
-function: 'max' '(' functionParameters ')';
-functionParameters: (expression | function | (queryvar | literal | stringLiteral)) (
-		',' (expression | function | (queryvar | literal | stringLiteral))
+	componentId COLON (expression | function) SEMI;
+function: functionName '(' functionParameters ')';
+functionName: 'max' | 'min' | 'sin' | 'cos' | 'map' | 'abs' | 'sign';
+functionParameters: (
+		expression
+		| function
+		| (queryvar | literal | stringLiteral)
+	) (
+		',' (
+			expression
+			| function
+			| (queryvar | literal | stringLiteral)
+		)
 	)*;
 
 mathoperatoradditions: '+' | '-';
-mathoperatorfactors: '*' | '/';
+mathoperatorfactors: '*' | '/' | '%';
 
 expression: term (mathoperatoradditions term)*;
 term: factor (mathoperatorfactors factor)*;
 factor:
-	var
+	function
+	| var
 	| queryvar
 	| UNSET
 	| literal
@@ -87,18 +86,8 @@ eventHandlerBody: (componentStatements | atRule)*;
 arguments: '(' (argument (',' argument)*) ')';
 argument: expression;
 
-// eventType: EventIdentifier;
-
 atRuleHeader: AtRuleIdentifier;
 atRule: query | (atRuleHeader LCURLY RCURLY);
-
-// componentAction: action;
-
-// action: LCURLY componentStatements RCURLY | EXCLAMATION actionCall | variableAssignment |
-// deferredAction;
-
-// actionCall: Identifier LPAREN actionCallParams RPAREN; actionCallParams: actionCallParam (COMMA
-// actionCallParam)*; actionCallParam: NUMBER | Identifier | variableAssignment;
 
 variableAssignment:
 	Identifier (DOT Identifier)? ASSIGN variableAssignmentValue;
@@ -106,8 +95,6 @@ variableAssignmentValue:
 	NUMBER
 	| Identifier
 	| variableAssignment;
-
-// deferredAction: '@defer' LCURLY componentStatements RCURLY;
 
 define:
 	defineHeader ((LCURLY defineDeclarations RCURLY) | SEMI);
@@ -122,7 +109,6 @@ query:
 	);
 queryHeader: '@query' queryExpression;
 
-// defineBody : LCURLY d
 componentPropertyId: Identifier;
 type: 'boolean' | 'number';
 
@@ -150,6 +136,10 @@ MINUS: '-';
 MULT: '*';
 DIV: '/';
 ASSIGN: '=';
+LESSTHAN: '<';
+GREATERTHAN: '>';
+LESSTHANOREQUAL: '<=';
+GREATERTHANOREQUAL: '>=';
 EXCLAMATION: '!';
 QUESTION: '?';
 DOLLAR: '$';

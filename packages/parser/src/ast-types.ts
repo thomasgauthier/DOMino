@@ -47,6 +47,7 @@ export type ComponentStatement = {
 export type Function = {
     type: 'Function',
     arguments: FunctionArgumentList
+    functionName: string
 } & ASTNode
 
 export type FunctionArgumentList = {
@@ -62,9 +63,9 @@ export type Declaration = {
 
 export type BinaryExpression = {
     type: 'BinaryExpression',
-    left: BinaryExpression | Literal | StringLiteral | Identifier,
-    right: BinaryExpression | Literal | StringLiteral | Identifier,
-    operator: '+' | '-' | '*' | '/'
+    left: Function | BinaryExpression | Literal | StringLiteral | Identifier,
+    right: Function | BinaryExpression | Literal | StringLiteral | Identifier,
+    operator: '+' | '-' | '*' | '/' | '%'
 } & ASTNode
 
 export type Literal = {
@@ -109,7 +110,7 @@ export type ComponentSelector = {
     boundedEntity?: Identifier,
     identifier: Identifier,
     as?: Identifier,
-    matcher?: '=',
+    matcher?: '=' | '<' | '>' | '<=' | '>=',
     value?: Identifier | Literal | StringLiteral,
 } & ASTNode
 

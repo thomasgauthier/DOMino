@@ -187,13 +187,19 @@ function visitComponentStatement(ctx: ComponentStatementContext): ComponentState
 }
 
 function visitFunction(ctx: FunctionContext): Function {
-    return withLoc<Function>({
-        type: 'Function',
-        arguments: withLoc<FunctionArgumentList>({
-            type: 'FunctionArgumentList',
-            arguments: visitFunctionParameters(ctx.functionParameters())
-        }, ctx.functionParameters())
-    }, ctx)
+    try {
+        return withLoc<Function>({
+            type: 'Function',
+            arguments: withLoc<FunctionArgumentList>({
+                type: 'FunctionArgumentList',
+                arguments: visitFunctionParameters(ctx.functionParameters()),
+            }, ctx.functionParameters()),
+            functionName: ctx.functionName().text
+        }, ctx)
+    } catch (error) {
+        throw new Error(JSON.stringify({ start: ctx.start, stop: ctx.stop }))
+    }
+
 }
 
 function visitFunctionParameters(ctx: FunctionParametersContext) {
@@ -209,14 +215,14 @@ function visitFunctionParameters(ctx: FunctionParametersContext) {
             }, c)
         }
 
-        if(c instanceof LiteralContext) {
+        if (c instanceof LiteralContext) {
             return withLoc<Literal>({
                 type: 'Literal',
                 value: c.text
             }, c)
         }
 
-        if(c instanceof StringLiteralContext) {
+        if (c instanceof StringLiteralContext) {
             return withLoc<StringLiteral>({
                 type: 'StringLiteral',
                 value: c.text
@@ -229,7 +235,7 @@ function visitFunctionParameters(ctx: FunctionParametersContext) {
     }).filter(param => param)
 }
 
-function visitExpression(ctx: ExpressionContext): BinaryExpression | Literal | StringLiteral | Identifier {
+function visitExpression(ctx: ExpressionContext): Function | BinaryExpression | Literal | StringLiteral | Identifier {
     if (ctx.childCount == 1 && ctx.term().length) {
         return visitTerm(ctx.term(0))
     } else if (ctx.childCount == 3 && (ctx.mathoperatoradditions())) {
@@ -237,13 +243,13 @@ function visitExpression(ctx: ExpressionContext): BinaryExpression | Literal | S
             type: 'BinaryExpression',
             left: visitTerm(ctx.term(0)!),
             right: visitTerm(ctx.term(1)!),
-            operator: ctx.mathoperatoradditions(0).text as ('+' | '-' | '*' | '/')
+            operator: ctx.mathoperatoradditions(0).text as ('+' | '-' | '*' | '/' | '%')
         }, ctx)
     } else if (ctx.term().length >= 3) {
         let terms = ctx.term().map(term => visitTerm(term));
         let operators = ctx.mathoperatoradditions();
 
-        function buildTree(terms: (BinaryExpression | Literal | StringLiteral | Identifier)[], operators: MathoperatoradditionsContext[]) {
+        function buildTree(terms: (Function | BinaryExpression | Literal | StringLiteral | Identifier)[], operators: MathoperatoradditionsContext[]) {
             if (terms.length == 1) {
                 return terms[0]
             } else {
@@ -272,7 +278,7 @@ function visitExpression(ctx: ExpressionContext): BinaryExpression | Literal | S
 }
 
 
-function visitTerm(ctx: TermContext): Literal | StringLiteral | Identifier | BinaryExpression {
+function visitTerm(ctx: TermContext): Function | Literal | StringLiteral | Identifier | BinaryExpression {
 
     if (ctx.childCount == 1 && ctx.factor(0)) {
         return visitFactor(ctx.factor(0));
@@ -281,13 +287,13 @@ function visitTerm(ctx: TermContext): Literal | StringLiteral | Identifier | Bin
             type: 'BinaryExpression',
             left: ctx.factor(0).expression() ? visitExpression(ctx.factor(0).expression()) : visitFactor(ctx.factor(0)),
             right: ctx.factor(1).expression() ? visitExpression(ctx.factor(1).expression()) : visitFactor(ctx.factor(1)),
-            operator: ctx.mathoperatorfactors(0).text as ('+' | '-' | '*' | '/')
+            operator: ctx.mathoperatorfactors(0).text as ('+' | '-' | '*' | '/' | '%')
         }, ctx)
     } else if (ctx.factor().length > 2) {
         let factors = ctx.factor().map(factor => factor.expression() ? visitExpression(factor.expression()) : visitFactor(factor));
         let operators = ctx.mathoperatorfactors();
 
-        function buildTree(factors: (BinaryExpression | Literal | StringLiteral | Identifier)[], operators: MathoperatorfactorsContext[]) {
+        function buildTree(factors: (Function | BinaryExpression | Literal | StringLiteral | Identifier)[], operators: MathoperatorfactorsContext[]) {
             if (factors.length == 1) {
                 return factors[0]
             } else {
@@ -315,8 +321,11 @@ function visitTerm(ctx: TermContext): Literal | StringLiteral | Identifier | Bin
     }
 }
 
-function visitFactor(ctx: FactorContext): Literal | StringLiteral | Identifier | BinaryExpression {
-    if (ctx.queryvar()) {
+function visitFactor(ctx: FactorContext): Function | Literal | StringLiteral | Identifier | BinaryExpression {
+    if (ctx.function()) {
+        return visitFunction(ctx.function())
+    }
+    else if (ctx.queryvar()) {
         return withLoc<Identifier>({
             type: 'Identifier',
             name: ctx.queryvar().text
@@ -477,7 +486,7 @@ function visitComponentSelector(ctx: ComponentSelectorContext): ComponentSelecto
                 type: 'Identifier',
                 name: ctx.componentAttribute()!.componentId()!.text,
             }, ctx.componentAttribute()!.componentId()!),
-            matcher: '=',
+            matcher: ctx.componentAttribute().componentAttributeComparator().text as "=" | "<" | ">" | "<=" | ">=",
             value: value
         }, ctx);
     } /*else if (ctx.selector().componentSelector().componentAttribute().componentAttributeValue().queryvar()) {
