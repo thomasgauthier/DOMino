@@ -1,5 +1,5 @@
 import { Block as ASTBlock, Query as ASTQuery } from "ecss-parser/dist/ast-types";
-import { BlockContext } from "../contexts/BlockContext";
+import { BlockContext, useBlockContext } from "../contexts/BlockContext";
 import { NodeEvaluator, NodeEvaluatorProps } from "../node";
 import { QueryWithLifecycle } from "../queryLifecycle";
 import { useMemo, useState } from "../reactive";
@@ -10,6 +10,8 @@ import Query from "../system/query";
 type Props = NodeEvaluatorProps<{ query: ASTQuery, block: ASTBlock, setOnExit?: (onExit: () => (set: Set<number>) => void) => void, setOnEnter?: (onEnter: () => (set: Set<number>) => void) => void, }>
 
 const QueryAndBlock: NodeEvaluator<Props> = ({ query, block, setEvaluate, setOnExit, setOnEnter }) => {
+    const parentQueryCtx = useBlockContext();
+
     const [blockEvaluate, setBlockEvaluate] = useState<() => (set: Set<number>) => void>(() => () => { })
     const [childOnExit, rawSetChildOnExit] = useState<() => (set: Set<number>) => void>(() => (set: Set<number>) => { })
     const [childOnEnter, rawSetChildOnEnter] = useState<() => (set: Set<number>) => void>(() => (set: Set<number>) => { })
@@ -36,7 +38,7 @@ const QueryAndBlock: NodeEvaluator<Props> = ({ query, block, setEvaluate, setOnE
                 }
 
                 const removed = lifecycle.removed;
-                if (removed.size) {                    
+                if (removed.size) {
                     childOnExitEval(removed);
                 }
 
@@ -56,7 +58,11 @@ const QueryAndBlock: NodeEvaluator<Props> = ({ query, block, setEvaluate, setOnE
             const getLifecycle = evaluateQuery()()
             const childOnExitEval = childOnExit()()
 
-            return () => childOnExitEval(getLifecycle().all);
+            return () => {
+
+                childOnExitEval(getLifecycle().all)
+                getLifecycle().update(new Set())
+            };
         })
 
         setOnExit(() => {
@@ -70,7 +76,7 @@ const QueryAndBlock: NodeEvaluator<Props> = ({ query, block, setEvaluate, setOnE
     const queryCtx = {
         evaluateQueryVar: (queryVar: string, eid: number) => {
             const evaluator = queryVarEvaluationMap.get(queryVar);
-            return evaluator ? evaluator()(eid) : null
+            return evaluator ? evaluator()(eid) : (parentQueryCtx?.evaluateQueryVar(queryVar, eid) || null)
         },
         evaluateComponentIdentifier: (identifier: string) => {
             return identifier;
