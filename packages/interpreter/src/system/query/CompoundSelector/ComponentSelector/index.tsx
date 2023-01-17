@@ -1,7 +1,7 @@
 import { ComponentSelector as ASTComponentSelector, Identifier } from "ecss-parser/dist/ast-types";
 import { useOutsideWorldContext } from "../../../../contexts/OutsideWorldContext";
 import { useBlockContext } from "../../../../contexts/BlockContext";
-import { FunctionComponent, EntityNodeEvaluator, EntityNodeEvaluatorProps } from "../../../../node";
+import { FunctionComponent } from "../../../../node";
 import { componentStringNameToComponentProperty } from "../../../../utils";
 type Props = { node: ASTComponentSelector }
 

@@ -12,8 +12,28 @@ const CompoundSelector: EntityNodeEvaluator<Props> = ({ node: compoundSelector, 
             const components = compoundSelector.selectors.map(s => componentNameToComponent(s.identifier.name));
             const query = defineQuery(components);
 
-            const guards = compoundSelector.selectors.map(s => s.matcher == '=' ? (eid: number) => {
-                return readComponent(componentNameToComponent(s.identifier.name), null, eid) == JSON.parse((s.value as ASTLiteral).value);
+            const guards = compoundSelector.selectors.map(s => (s.matcher && !(s.value.type == 'Identifier' && s.value.name && s.value.name.startsWith('?'))) ?
+            
+            (eid: number) => {
+                if(s.matcher == '=') {
+                    return readComponent(componentNameToComponent(s.identifier.name), null, eid) == JSON.parse((s.value as ASTLiteral).value);
+                }
+
+                if(s.matcher == '<') {
+                    return readComponent(componentNameToComponent(s.identifier.name), null, eid) < JSON.parse((s.value as ASTLiteral).value);
+                }
+
+                if(s.matcher == '>') {
+                    return readComponent(componentNameToComponent(s.identifier.name), null, eid) > JSON.parse((s.value as ASTLiteral).value);
+                }
+
+                if(s.matcher == '<=') {
+                    return readComponent(componentNameToComponent(s.identifier.name), null, eid) <= JSON.parse((s.value as ASTLiteral).value);
+                }
+
+                if(s.matcher == '>=') {
+                    return readComponent(componentNameToComponent(s.identifier.name), null, eid) >= JSON.parse((s.value as ASTLiteral).value);
+                }
             } : null).filter(f => f !== null)
 
             return () => {

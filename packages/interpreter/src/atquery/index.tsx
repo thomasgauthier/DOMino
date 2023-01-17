@@ -20,7 +20,6 @@ const AtQuery: NodeEvaluator<Props> = ({ node: atquery, setEvaluate, setOnExit, 
         })
     }
 
-
     return <QueryAndBlock query={atquery.query} block={atquery.body} setEvaluate={setEvaluate} setOnExit={setOnExitT} setOnEnter={setOnEnter} />
 
 }

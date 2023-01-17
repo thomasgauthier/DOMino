@@ -18,14 +18,19 @@ const ComponentDefinition: NodeEvaluator<Props> = ({ node: componentDefinition, 
 
             return () => {
 
-                const schema = resolvedEvaluators.reduce((acc, e, i) => {
-
+                let schema = resolvedEvaluators.reduce((acc, e, i) => {
                     return {
                         ...acc, ...{
                             [componentDefinition.properties[i].name]: e()
                         }
                     }
                 }, {})
+
+                if (Object.keys(schema).length === 0) {
+                    schema = {
+                        is: "i32"
+                    }
+                }
 
                 defineComponent(componentDefinition.name, schema);
             }
@@ -45,25 +50,3 @@ const ComponentDefinition: NodeEvaluator<Props> = ({ node: componentDefinition, 
 }
 
 export default ComponentDefinition
-
-
-// program?.components.forEach(c => {
-//     if (c.properties.length) {
-//         const schema = c.properties.reduce((acc, c) => {
-
-
-//             acc[c.name] = (c.propertyType == 'number') ? Types.f32 : (
-//                 c.propertyType == 'boolean' ? Types.ui32 : c.propertyType
-//             )
-
-//             return acc;
-//         }, {})
-
-
-//         const component = defineComponent(schema)
-//         definedComponents.set(c.name, component)
-//     } else {
-//         const component = defineComponent({ is: Types.i32 })
-//         definedComponents.set(c.name, component)
-//     }
-// })

@@ -1,5 +1,5 @@
 
-import { Type } from "bitecs";
+import { Component, Type } from "bitecs";
 import React2 from "./../react2"
 
 export interface Schema { [key: string]: Type };
@@ -10,7 +10,8 @@ export const OutsideWorldContext = React2.createContext<{
     writeComponent: (component: any, property: string | null, value: any, eid: number) => void,
     getAllEntities: () => Set<number>,
     defineQuery: (all: any[]) => () => Set<number>,
-    defineComponent: <T extends Schema>(name: string, schema: T) => any
+    defineComponent: <T extends Schema>(name: string, schema: T) => any,
+    removeComponent: (component : any, eid: number) => void
     highlightCode: (loc: {
         start: {
             line: number;

@@ -28,7 +28,8 @@ export default {
         writeComponent: (component: Component, property: string | null, value: any, eid: number) => void,
         getAllEntities: () => Set<number>,
         defineQuery: (all: Component[]) => () => Set<number>,
-        defineComponent: <T extends Schema>(schema: T) => Component
+        defineComponent: <T extends Schema>(schema: T) => Component,
+        removeComponent: (component: Component, eid: number) => void,
         highlightCode: (loc: {
             start: {
                 line: number;
@@ -57,6 +58,12 @@ export default {
 
             const map = new Map<string, Component>()
 
+            let deltaTime = 0;
+
+            function getDeltaTime() {
+                return deltaTime;
+            }
+
             React2.render(
                 <OutsideWorldContext.Provider value={{
                     ...callables, defineComponent: (name: string, schema: Schema) => {
@@ -70,9 +77,10 @@ export default {
                         return component
                     },
                     componentNameToComponent(name) {
-                        return map.get(name) || callables.componentNameToComponent(name);
+                        const splitted = name.split('-')
+                        return map.get(splitted[0]) || callables.componentNameToComponent(splitted[0]);
                     },
-                    getDeltaTime: () => (1 / 60) * 1000
+                    getDeltaTime
                 }}>
                     <Program node={program} setEvaluate={setEvaluate} />
                 </OutsideWorldContext.Provider>
@@ -81,6 +89,7 @@ export default {
 
             return {
                 update: (dt: number) => {
+                    deltaTime = dt;
                     evaluate.value();
                 }
             }

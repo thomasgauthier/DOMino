@@ -29,16 +29,16 @@ const BinarySelector: EntityNodeEvaluator<Props> = ({ node: binarySelector, setE
                 return () => {
 
                     if (binarySelector.operator == ':any') {
-                        return r().reduce((acc, val) => {
+                        return l().intersection(r().reduce((acc, val) => {
                             return acc.union(val);
-                        }, l())
+                        }, new Set()))
                     }
 
 
                     if (binarySelector.operator === ':not') {
-                        return r().reduce((acc, val) => {
+                        return l().intersection(r().reduce((acc, val) => {
                             return acc.difference(val);
-                        }, l())
+                        }, getAllEntities()))
                     }
 
                 }

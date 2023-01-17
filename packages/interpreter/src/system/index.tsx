@@ -11,8 +11,6 @@ import QueryAndBlock from "../virtual/QueryAndBlock";
 type Props = NodeEvaluatorProps<{ node: ASTSystem }>
 
 const System: NodeEvaluator<Props> = ({ node: system, setEvaluate }) => {
-    console.log("visit System");
-    
     return <QueryAndBlock query={system.query} block={system.body} setEvaluate={setEvaluate} />
 }
 

@@ -1,6 +1,7 @@
 import { BinaryExpression as ASTBinaryExpression } from "ecss-parser/dist/ast-types";
 import Literal from "./Literal"
 import Identifier from "./Identifier"
+import Function from "../Function"
 import { EntityNodeEvaluator, EntityNodeEvaluatorProps } from "../../../../../node";
 import { useState, useMemo } from "../../../../../reactive"
 
@@ -46,6 +47,10 @@ const BinaryExpression: EntityNodeEvaluator<Props> = ({ node, setEvaluate }) => 
                         return numberL / numberR;
 
                     }
+
+                    if (node.operator === '%') {
+                        return numberL % numberR;
+                    }
                 }
 
                 return undefined
@@ -59,13 +64,15 @@ const BinaryExpression: EntityNodeEvaluator<Props> = ({ node, setEvaluate }) => 
 
     const left = node.left.type === 'Literal' ? <Literal node={node.left} setEvaluate={setLeftEvaluate} /> :
         node.left.type === 'Identifier' ? <Identifier node={node.left} setEvaluate={setLeftEvaluate} /> :
-            node.left.type === 'BinaryExpression' ? <BinaryExpression node={node.left} setEvaluate={setLeftEvaluate} /> :
-                <></>
+            node.left.type === 'Function' ? <Function node={node.left} setEvaluate={setLeftEvaluate} /> :
+                node.left.type === 'BinaryExpression' ? <BinaryExpression node={node.left} setEvaluate={setLeftEvaluate} /> :
+                    <></>
 
     const right = node.right.type === 'Literal' ? <Literal node={node.right} setEvaluate={setRightEvaluate} /> :
-        node.right.type === 'Identifier' ? <Identifier node={node.right}  setEvaluate={setRightEvaluate} /> :
-            node.right.type === 'BinaryExpression' ? <BinaryExpression node={node.right} setEvaluate={setRightEvaluate} /> :
-                <></>
+        node.right.type === 'Identifier' ? <Identifier node={node.right} setEvaluate={setRightEvaluate} /> :
+            node.right.type === 'Function' ? <Function node={node.right} setEvaluate={setRightEvaluate} /> :
+                node.right.type === 'BinaryExpression' ? <BinaryExpression node={node.right} setEvaluate={setRightEvaluate} /> :
+                    <></>
 
     return <>
         {left}
