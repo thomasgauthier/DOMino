@@ -14,7 +14,7 @@ const Block: NodeEvaluator<Props> = ({ node: block, setEvaluate, setOnExit, setO
     const [childOnExit, setChildOnExit] = useState<(() => (set: Set<number>) => void)[]>([])
     const [childOnEnter, setChildOnEnter] = useState<(() => (set: Set<number>) => void)[]>([])
 
-    const [atQueryEvaluator, setAtQueryEvaluator] = useState<(() => () => void)>(() => () => null)
+    const atQueryEvaluators = block.children.map((c) => c.type === 'AtQuery' ? useState<(() => () => void)>(() => () => null) : null)
 
     if (setOnExit) {
         const onEnterMemo = useMemo(() => {
@@ -75,12 +75,11 @@ const Block: NodeEvaluator<Props> = ({ node: block, setEvaluate, setOnExit, setO
                 })
             }
 
-            const evaluateAtQuery = atQueryEvaluator()();
+            const evaluateAtQueries = atQueryEvaluators.filter(e => e).map(e => e[0]()());
 
             return (entities: Set<number>) => {
-                if (evaluateAtQuery) {
-                    evaluateAtQuery();
-                }
+                evaluateAtQueries.forEach(e => e());
+
                 evaluateAllChildren(entities);
             }
         })
@@ -102,7 +101,7 @@ const Block: NodeEvaluator<Props> = ({ node: block, setEvaluate, setOnExit, setO
 
 
             if (c.type === 'AtQuery') {
-                return <AtQuery node={c} setEvaluate={setAtQueryEvaluator} setOnExit={addChildOnExit} setOnEnter={addChildOnEnter} />
+                return <AtQuery node={c} setEvaluate={atQueryEvaluators[i][1]} setOnExit={addChildOnExit} setOnEnter={addChildOnEnter} />
             }
 
             if (c.type === 'ComponentStatement') {
