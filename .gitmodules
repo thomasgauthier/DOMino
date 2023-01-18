@@ -1,3 +1,0 @@
-[submodule "packages/bitECS"]
-	path = packages/bitECS
-	url = https://github.com/NateTheGreatt/bitECS.git
