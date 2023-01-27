@@ -33,13 +33,13 @@ const ecssEditorPlugin = () => {
 
         const editorDistFolder = path.dirname(iframePath);
 
-        const files = [...await glob(`${editorDistFolder}/*.ttf`), ...await glob(`${editorDistFolder}/iframe.js*`)]
+        const files = [...await glob(`${editorDistFolder}/*.ttf`), ...await glob(`${editorDistFolder}/iframe.css*`), ...await glob(`${editorDistFolder}/iframe.js*`)]
 
         for (const file of files) {
           await fs.copyFile(file, path.join(outPath, path.basename(file)))
 
           if (build.initialOptions.sourcemap && file.endsWith('.map') || !file.endsWith('.map')) {
-            await fs.copyFile(iframePath + '.map', path.join(outPath, 'iframe.js.map'))
+            await fs.copyFile(iframePath + '.map', path.join(outPath, path.basename(iframePath) + '.map'))
           }
         }
       })

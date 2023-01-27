@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node build.js",
-    "watch": "node build.js --watch"
+    "build": "node --experimental-import-meta-resolve  build.js",
+    "watch": "node --experimental-import-meta-resolve build.js --watch"
   },
   "keywords": [],
   "author": "",
