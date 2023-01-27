@@ -65,6 +65,34 @@ const cursorState: {
     }[]
 } = {}
 
+const completionItemProvider: monaco.languages.CompletionItemProvider = {
+    triggerCharacters: ['?'],
+    provideCompletionItems(model, position) {
+        if (!completer || !cursorState.position) {
+            return { suggestions: [] }
+        }
+
+        const word = model.getWordUntilPosition(position);
+
+        const sentCompletions = completer.possibleAt(cursorState.position, word.word)
+
+        const endOfWord = editor.getModel()!.getOffsetAt(position);
+        const startOfWord = editor.getModel()!.getPositionAt(endOfWord - word.word.length);
+
+        return {
+            suggestions: sentCompletions.map(({ result, kind, detail }) => ({
+                label: result,
+                insertText: result,
+                kind,
+                detail,
+                range: new monaco.Range(startOfWord.lineNumber, startOfWord.column, startOfWord.lineNumber, startOfWord.column),
+            }))
+        };
+    }
+};
+
+monaco.languages.registerCompletionItemProvider('custom', completionItemProvider);
+
 const editor = monaco.editor.create(editorNode, {
     value: '',
     language: 'custom',
