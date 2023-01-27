@@ -27,6 +27,18 @@ public class ecssBaseListener implements ecssListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterKeyframe(ecssParser.KeyframeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitKeyframe(ecssParser.KeyframeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterSystem(ecssParser.SystemContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -238,6 +250,18 @@ public class ecssBaseListener implements ecssListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSystemBody(ecssParser.SystemBodyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStatementPlaceHolder(ecssParser.StatementPlaceHolderContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatementPlaceHolder(ecssParser.StatementPlaceHolderContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -1,18 +1,26 @@
+import "editor"
 import { createEffect, createSignal, onMount } from "solid-js";
 import { render } from "solid-js/web"
-import Monaco, { Components } from "./components/Monaco";
 import createEngine from "engine"
-
-import { Range } from "monaco-editor";
+import debounce from "lodash.debounce"
 import { createElementSize } from "@solid-primitives/resize-observer";
 
 import "./styles/main.css"
+import Editor from "editor/dist/component";
+import snippet from "./snippet.ecss"
+import { Components } from "editor";
 
 function Main() {
     let ref: HTMLCanvasElement | undefined;
+    let editorRef: HTMLDivElement | undefined;
 
+    const [code, rawSetCode] = createSignal<string>('')
 
-    const [imperativeHandle, setImperativeHandle] = createSignal<{ setComponents?: (components: Components) => void, clearHighlights?: () => void, setValue?: (code: string) => void, highlight?: (range: Range, timeout: number | null) => void } | null>(null);
+    const setCode = debounce((code: string) => {
+        rawSetCode(code)
+    }, 300)
+
+    const [imperativeHandle, setImperativeHandle] = createSignal<{ setComponents?: (components: Components) => void, clearHighlights?: () => void, setValue?: (code: string) => void, highlight?: (locations: [offsetstart: number, offsetend: number][], timeout: number | null) => void } | null>(null);
     const [engine, setEngine] = createSignal<ReturnType<typeof createEngine> | null>(null)
 
     createEffect(() => {
@@ -29,14 +37,17 @@ function Main() {
 
         const handle = imperativeHandle();
 
-        if (saved && handle?.setValue) {
-            handle.setValue(saved)
-        }
+        if (handle && handle.setValue) {
 
+            if (saved) {
+                handle.setValue(saved)
+            } else {
+                handle.setValue(snippet)
+            }
+        }
     })
 
     let outofsync = false;
-
 
     onMount(() => {
         const size = createElementSize(ref!);
@@ -49,16 +60,21 @@ function Main() {
                 ref.width = width;
                 ref.height = height;
             }
-
         })
 
-
         const engine = createEngine(ref as HTMLCanvasElement, {
-            highlightCode(loc, timeout) {
-
+            highlightCode(locs, timeout) {
                 const handle = imperativeHandle();
+
                 if (handle?.highlight && !outofsync) {
-                    handle.highlight(new Range(loc!.start.line, loc!.start.column, loc!.end.line, loc!.end.column + 1), timeout || null)
+                    const l = locs.map(e => {
+                        return [
+                            e!.start.offset,
+                            e!.end.offset
+                        ] as [number, number]
+                    })
+
+                    handle.highlight(l, timeout || null);
                 }
             },
             clearHighlights: () => {
@@ -75,25 +91,54 @@ function Main() {
         }
 
         setEngine(engine);
+
+        if (editorRef) {
+            const editor = editorRef as any as Editor;
+
+            editor.addEventListener('load', () => {
+                mergeSetImperativeHangle(editor.imperativeHandle)
+            })
+
+            editor.addEventListener('codechanged', ({ detail: code }) => {
+                onCodeChange(code);
+            })
+        }
     })
 
-    function onCodeChange(code: string) {
-        localStorage.setItem('codevalue', code)
-        const handle = imperativeHandle()
-        if (handle && handle.clearHighlights) {
-            handle.clearHighlights()
-        }
+    function onCodeChange(newCode: string) {
+        setTimeout(() => {
+            localStorage.setItem('codevalue', newCode)
 
+        }, 0)
+
+
+        setTimeout(() => {
+            const handle = imperativeHandle()
+            if (handle && handle.clearHighlights) {
+                handle.clearHighlights()
+            }
+
+        }, 0)
+
+        setCode(newCode);
+    }
+
+    createEffect(() => {
         const e = engine();
+        const c = code();
 
         if (e) {
-            e.update(code);
+            try {
+                e.update(c);
+            } catch (e) {
+                console.error(e);
+            }
         }
-    }
+    })
 
     const mergeSetImperativeHangle = (value: ReturnType<typeof imperativeHandle>) => {
         if (value) {
-            setImperativeHandle({ ...imperativeHandle(),  ...value });
+            setImperativeHandle({ ...imperativeHandle(), ...value });
         }
     }
 
@@ -101,27 +146,67 @@ function Main() {
     return <div class="main">
 
         <div id="game" style="width:0;height:0;">
-
             <x-entity position='{"x":0,"y":400}' dimension='{"width":500,"height":100}' rigidbody='{"static": 1}'
-                floor='{"is":true}' velocity='{}' color='{"stringmapid":"blue"}'>
+                floor='{"is":true}' velocity='{}' scale='{"scale": 1}' sprite='{"stringmapid":"sprites/floor.png"}' sprite-repeat='{"stringmapid":"sprites/brick.png"}' >
             </x-entity>
 
-            <x-entity position='{"x":500,"y":0}' dimension='{"width":100,"height":500}' rigidbody='{"static": 1}'
-                wall='{"is":true}' velocity='{}' color='{"stringmapid":"orange"}'>
+            <x-entity position='{"x":231,"y":384}' dimension='{"width":32,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/bush.png"}'   >
+            </x-entity>
+
+            <x-entity position='{"x":391,"y":384}' dimension='{"width":32,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/bush.png"}'   >
+            </x-entity>
+
+            <x-entity position='{"x":270,"y":336}' dimension='{"width":16,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/questioncube.png"}' rigidbody='{"static": 1}' velocity='{}'  >
+            </x-entity>
+
+            <x-entity position='{"x":335,"y":336}' dimension='{"width":16,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/brick.png"}' rigidbody='{"static": 1}' velocity='{}'  >
+            </x-entity>
+
+            <x-entity position='{"x":351,"y":336}' dimension='{"width":16,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/questioncube.png"}' rigidbody='{"static": 1}' velocity='{}'  >
+            </x-entity>
+
+            <x-entity position='{"x":366,"y":336}' dimension='{"width":16,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/brick.png"}' rigidbody='{"static": 1}' velocity='{}'  >
+            </x-entity>
+
+            <x-entity position='{"x":382,"y":336}' dimension='{"width":16,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/questioncube.png"}' rigidbody='{"static": 1}' velocity='{}'  >
+            </x-entity>
+
+            <x-entity position='{"x":398,"y":336}' dimension='{"width":16,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/brick.png"}' rigidbody='{"static": 1}' velocity='{}'  >
+            </x-entity>
+
+            <x-entity position='{"x":366,"y":272}' dimension='{"width":16,"height":16}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/questioncube.png"}' rigidbody='{"static": 1}' velocity='{}'  >
+            </x-entity>
+
+            <x-entity position='{"x":183,"y":240}' dimension='{"width":32,"height":24}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/cloud.png"}'  >
+            </x-entity>
+
+            <x-entity position='{"x":327,"y":224}' dimension='{"width":32,"height":24}'
+                scale='{"scale": 1}' sprite='{"stringmapid":"sprites/cloud.png"}'  >
+            </x-entity>
+
+            <x-entity sprite='{"stringmapid":"sprites/mountain.png"}' position='{"x":0,"y":365}' scale='{"scale": 1}' dimension='{"width":80,"height":35}'>
             </x-entity>
 
             <x-entity sprite='{"stringmapid":"sprites/thwomp.png"}' speed='{"value":0.5}' scale='{"scale": 1}'
-               controller='{}' position='{"x":0,"y":0}' dimension='{"width":32,"height":32}' mario='{"is":true}' rigidbody='{}' velocity='{}'>
+                controller='{}' position='{"x":0,"y":0}' dimension='{"width":16,"height":16}' mario='{"is":true}' rigidbody='{}' velocity='{}'>
             </x-entity>
 
-
             <x-entity global='{}'></x-entity>
-
 
         </div>
 
         <canvas ref={ref} class="game" />
-        <Monaco setImperativeHandle={mergeSetImperativeHangle} onChange={onCodeChange} />
+        <ecss-editor ref={editorRef!}></ecss-editor>
     </div>;
 }
 

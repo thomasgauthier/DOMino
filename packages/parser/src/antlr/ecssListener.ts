@@ -4,6 +4,7 @@
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { ProgramContext } from "./ecssParser";
+import { KeyframeContext } from "./ecssParser";
 import { SystemContext } from "./ecssParser";
 import { SystemHeaderContext } from "./ecssParser";
 import { ComponentSelectorContext } from "./ecssParser";
@@ -22,6 +23,7 @@ import { ComponentAttributeValueContext } from "./ecssParser";
 import { VarContext } from "./ecssParser";
 import { QueryvarContext } from "./ecssParser";
 import { SystemBodyContext } from "./ecssParser";
+import { StatementPlaceHolderContext } from "./ecssParser";
 import { ComponentStatementsContext } from "./ecssParser";
 import { ComponentStatementContext } from "./ecssParser";
 import { FunctionContext } from "./ecssParser";
@@ -71,6 +73,17 @@ export interface ecssListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProgram?: (ctx: ProgramContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `ecssParser.keyframe`.
+	 * @param ctx the parse tree
+	 */
+	enterKeyframe?: (ctx: KeyframeContext) => void;
+	/**
+	 * Exit a parse tree produced by `ecssParser.keyframe`.
+	 * @param ctx the parse tree
+	 */
+	exitKeyframe?: (ctx: KeyframeContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `ecssParser.system`.
@@ -269,6 +282,17 @@ export interface ecssListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitSystemBody?: (ctx: SystemBodyContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `ecssParser.statementPlaceHolder`.
+	 * @param ctx the parse tree
+	 */
+	enterStatementPlaceHolder?: (ctx: StatementPlaceHolderContext) => void;
+	/**
+	 * Exit a parse tree produced by `ecssParser.statementPlaceHolder`.
+	 * @param ctx the parse tree
+	 */
+	exitStatementPlaceHolder?: (ctx: StatementPlaceHolderContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `ecssParser.componentStatements`.

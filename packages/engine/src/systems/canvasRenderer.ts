@@ -1,5 +1,5 @@
 import { defineQuery, hasComponent, IWorld, removeComponent } from "bitecs";
-import { color as Color, color2 as Color2, debugdraw as Debugdraw, dimension as Dimension, frame as Frame, position as Position, flip as Flip, scale as Scale, sprite as Sprite, spritesheet as Spritesheet } from "../components";
+import { spriteRepeat as SpriteRepeat, color as Color, color2 as Color2, debugdraw as Debugdraw, dimension as Dimension, frame as Frame, position as Position, flip as Flip, scale as Scale, sprite as Sprite, spritesheet as Spritesheet } from "../components";
 import queryLifecycle from "../queryLifecycle";
 import stringmap from "../stringmap";
 import { basename } from "../utils";
@@ -84,7 +84,7 @@ const spritesheets = new Map<number, {
 const spritesheetsUrlMap = new Map<string, any>();
 
 
-function setpixelated(context: CanvasRenderingContext2D){
+function setpixelated(context: CanvasRenderingContext2D) {
     context['imageSmoothingEnabled'] = false;       /* standard */
     context['mozImageSmoothingEnabled'] = false;    /* Firefox */
     context['oImageSmoothingEnabled'] = false;      /* Opera */
@@ -150,57 +150,72 @@ export default (canvas: HTMLCanvasElement) => {
                 previousSprite.set(eid, Sprite.stringmapid[eid]);
             })
 
-            if (!spriteSheetset.all.size) {
-                spriteSet.all.forEach(eid => {
-                    if (previousSprite.get(eid) && previousSprite.get(eid) != Sprite.stringmapid[eid]) {
-                        const [a, b] = [stringmap.getString(previousSprite.get(eid)), stringmap.getString(Sprite.stringmapid[eid])]
+            spriteSet.all.forEach(eid => {
+                if (hasComponent(world, Spritesheet, eid)) {
+                    return;
+                }
 
-                        imageStrIdMap.add(Sprite.stringmapid[eid])
-                        previousSprite.set(eid, Sprite.stringmapid[eid]);
+                if (previousSprite.get(eid) && previousSprite.get(eid) != Sprite.stringmapid[eid]) {
+                    imageStrIdMap.add(Sprite.stringmapid[eid])
+                    previousSprite.set(eid, Sprite.stringmapid[eid]);
+                }
+
+                const srcStringIdId = Sprite.stringmapid[eid];
+
+                if (imageSrcLoadMap.get(srcStringIdId)) {
+
+                    const scale = Scale.scale[eid];
+
+                    const isFlipped = Flip.horizontal[eid]
+                    if (isFlipped) {
+                        ctx.scale(-1, 1);
                     }
 
-                    const srcStringIdId = Sprite.stringmapid[eid];
 
-                    if (imageSrcLoadMap.get(srcStringIdId)) {
+                    if (hasComponent(world, SpriteRepeat, eid)) {
+                        const { width, height } = imageStrIdMap.get(srcStringIdId)!;
+                        const xTimes = Dimension.width[eid] / width;
+                        const yTimes = Dimension.height[eid] / height;
 
-                        const scale = Scale.scale[eid];
-
-                        const isFlipped = Flip.horizontal[eid]
-                        if (isFlipped) {
-                            ctx.scale(-1, 1);
+                        for (let x = 0; x < Math.ceil(xTimes); x++) {
+                            for (let y = 0; y < Math.ceil(yTimes); y++) {
+                                ctx.drawImage(imageStrIdMap.get(srcStringIdId)!, isFlipped ? -(Position.x[eid] + x * width) - Dimension.width[eid] : (Position.x[eid] + x * width), Position.y[eid] + y * height);
+                            }
                         }
-
-                        ctx.drawImage(imageStrIdMap.get(srcStringIdId)!,  isFlipped ? -(Position.x[eid])  - Dimension.width[eid] : Position.x[eid], Position.y[eid], Dimension.width[eid] * scale, Dimension.height[eid] * scale)
-
-                        if (isFlipped) {
-                            ctx.scale(-1, 1);
-                        }
+                    } else {
+                        ctx.drawImage(imageStrIdMap.get(srcStringIdId)!, isFlipped ? -(Position.x[eid]) - Dimension.width[eid] : Position.x[eid], Position.y[eid], Dimension.width[eid] * scale, Dimension.height[eid] * scale)
                     }
 
-                })
-            }
+                    if (isFlipped) {
+                        ctx.scale(-1, 1);
+                    }
+                }
+
+            })
 
             spriteSheetset.added.forEach(eid => {
                 const url = stringmap.getString(Spritesheet.stringmapid[eid]);
-                ; (async () => {
-                    let sheet = spritesheetsUrlMap.get(url);
+                if (url) {
+                    ; (async () => {
+                        let sheet = spritesheetsUrlMap.get(url);
 
-                    if (!sheet) {
-                        const res = await fetch(url);
-                        sheet = await res.json();
-                        spritesheetsUrlMap.set(url, sheet);
-                    }
+                        if (!sheet) {
+                            const res = await fetch(url);
+                            sheet = await res.json();
+                            spritesheetsUrlMap.set(url, sheet);
+                        }
 
-                    const dir = url.substring(0, url.length - basename(url).length);
-                    const spritesheet: string = dir + sheet.meta.image;
+                        const dir = url.substring(0, url.length - basename(url).length);
+                        const spritesheet: string = dir + sheet.meta.image;
 
-                    const id = stringmap.addString(spritesheet);
-                    spritesheets.set(Spritesheet.stringmapid[eid], {
-                        id,
-                        frames: Object.keys(sheet.frames).map(key => sheet.frames[key].frame)
-                    });
-                    imageStrIdMap.add(id)
-                })()
+                        const id = stringmap.addString(spritesheet);
+                        spritesheets.set(Spritesheet.stringmapid[eid], {
+                            id,
+                            frames: Object.keys(sheet.frames).map(key => sheet.frames[key].frame)
+                        });
+                        imageStrIdMap.add(id)
+                    })()
+                }
 
             })
 
@@ -217,7 +232,7 @@ export default (canvas: HTMLCanvasElement) => {
                         ctx.scale(-1, 1);
                     }
 
-                    ctx.drawImage(imageStrIdMap.get(srcStringIdId)!, frame.x, frame.y, frame.w, frame.h, isFlipped ? -(Position.x[eid])  - Dimension.width[eid] : Position.x[eid], Position.y[eid], Dimension.width[eid] * scale, Dimension.height[eid] * scale)
+                    ctx.drawImage(imageStrIdMap.get(srcStringIdId)!, frame.x, frame.y, frame.w, frame.h, isFlipped ? -(Position.x[eid]) - Dimension.width[eid] : Position.x[eid], Position.y[eid], Dimension.width[eid] * scale, Dimension.height[eid] * scale)
 
                     if (isFlipped) {
                         ctx.scale(-1, 1);

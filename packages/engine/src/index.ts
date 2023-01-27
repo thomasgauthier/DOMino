@@ -9,7 +9,7 @@ import {
 import Components, { dimension as Dimension, position as Position, timescale as Timescale, rigidbody as Rigidbody, velocity as Velocity, debugstring as Debugstring } from './components';
 import setupRenderSystem from "./systems/canvasRenderer"
 import setupPhysicsSystem from "./systems/physics"
-import inputSystem from "./systems/input"
+import setupInputSystem from "./systems/input"
 
 import react2interpreter from "interpreter"
 
@@ -32,7 +32,7 @@ export type EComponents = {
 }
 
 export default function createEngine(canvas: HTMLCanvasElement, callbacks: {
-    highlightCode: (loc: ASTNode["loc"], timeout?: number) => void;
+    highlightCode: (locs: ASTNode["loc"][], timeout?: number) => void;
     clearHighlights: () => void,
 }) {
 
@@ -73,23 +73,27 @@ export default function createEngine(canvas: HTMLCanvasElement, callbacks: {
         defineComponent: (schema: Schema) => {
             return defineComponent(schema);
         },
-        highlightCode(loc: ASTNode["loc"]) {
-            callbacks.highlightCode(loc);
+        highlightCode(locs: ASTNode["loc"][]) {
+            callbacks.highlightCode(locs);
         }
     }
 
     let currentRuntime: ReturnType<typeof react2interpreter["createRuntime"]>;// = ecssRuntime(code);
 
+
+    const inputSystem = setupInputSystem(canvas);
+
     let keepLooping = true;
+
+    const highlights: ASTNode["loc"][] = []
 
     function loop() {
 
         let lastTime = performance.now();
 
 
-        const innerLoop = async () => {
+        const innerLoop = async (now: number) => {
             setTimeout(() => { }, 0)
-            let now = performance.now();
             const timeScale = timesScaleQuery(world).reduce((acc, val) => Timescale.timescale[val], 1)
 
             let dt = (now - lastTime) * timeScale;
@@ -100,7 +104,7 @@ export default function createEngine(canvas: HTMLCanvasElement, callbacks: {
             }
 
             let clears = renderSystem(world);
-            physicsSystem(dt);
+            physicsSystem(now, dt);
 
             inputSystem(world);
 
@@ -111,11 +115,20 @@ export default function createEngine(canvas: HTMLCanvasElement, callbacks: {
 
             debugQuery(world).forEach(eid => {
                 console.log(Debugstring.value[eid]);
-            })
+
+                setTimeout(() => {
+                    removeComponent(world, Debugstring, eid)
+                }, 0)
+            });
+
+            ; (async () => await Promise.resolve())()
 
             CustomElements.update(dt);
 
             lastTime = now;
+
+            interpreterCallables.highlightCode(highlights);
+            highlights.splice(0, highlights.length)
 
             if (keepLooping) {
                 window.requestAnimationFrame(innerLoop)
@@ -131,9 +144,13 @@ export default function createEngine(canvas: HTMLCanvasElement, callbacks: {
     return {
         update(code: string) {
             try {
-                currentRuntime = react2interpreter.createRuntime(code, interpreterCallables)
+                currentRuntime = react2interpreter.createRuntime(code, {
+                    ...interpreterCallables, highlightCode(loc) {
+                        highlights.push(loc);
+                    },
+                })
             } catch (error) {
-                currentRuntime = null;
+                console.error(error);
             }
         },
         components: Object.keys(Components).reduce<EComponents>((acc, key: keyof typeof Components) => {

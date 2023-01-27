@@ -1,0 +1,201 @@
+@define [anim] { state: number; }
+@define [acceleration] { x: number; y: number; }
+@define [inputdir] { x: number; }
+@define [dir] { x: number; }
+@define [noinput];
+@define [absolutevelocity] { x: number; }
+@define [skidding];
+
+[global] {
+  debug: 1;
+}
+
+[mario] {
+  :enter {
+    acceleration-y: 0.5625;
+  }
+}
+
+[mario][velocity-x=?vx] {
+  absolutevelocity: abs(?vx);
+}
+
+[mario][touching-down][velocity-x=0] {
+  :enter {
+    spritesheet: unset; 
+    sprite: "sprites/idle.png";
+  }
+}
+
+[mario][touching-down]:any([dir=-1],[dir=1]):not([velocity-x=0]) {
+  spritesheet: "sprites/spritesheet.json";
+}
+
+[mario]:not([arrowleft], [arrowright], [bbutton]) {
+  :enter {
+    noinput: true;
+  }
+
+  :exit {
+    noinput: unset;
+  }
+}
+
+[inputdir=1] {
+  flip-horizontal: 0;
+}
+
+[inputdir=-1] {
+  flip-horizontal: 1;
+}
+
+[mario][velocity-x=?vx]:not([velocity-x=0]) {
+  @query [mario]:any([dir=1][velocity-x>0],[dir=-1][velocity-x<0]) {
+    frame: ($t / map(abs(?vx), 4.453125, 153.75, 8, 3, true)) % 3;
+  }
+
+  :exit {
+    spritesheet: unset;
+  }
+}
+
+[arrowright]:not([arrowleft]) 
+{
+  inputdir: 1;
+}
+
+[arrowleft]:not([arrowright]) 
+{
+  inputdir: -1;
+}
+
+[inputdir=1][velocity-x>0]{
+  dir: 1;
+}
+
+[inputdir=-1][velocity-x<0]{
+  dir: -1;
+}
+
+[mario]:not([arrowleft],[arrowright]) 
+{
+  inputdir: 0;
+}
+
+[mario]:any([inputdir=-1][velocity-x>0],[inputdir=1][velocity-x<0]) {
+  spritesheet: unset;
+  sprite: "sprites/skid.png";
+  skidding: true;
+  :exit {
+    skidding: unset;
+  }
+}
+
+[mario][dir=?dir][absolutevelocity-x<4.453125][inputdir=?dir]:not([inputdir=0]):not([skidding])
+{
+  velocity-x: 4.453125 * sign(?dir);
+}
+
+//walking
+[mario][velocity-x=?vx][inputdir=?inputdir]:not([inputdir=0]) {
+  @query [mario]:not([bbutton]) {
+    acceleration-x: 0.13359375 * ?inputdir;
+    @query [mario]:not([skidding]) {
+      velocity-x: min(abs(?vx), 93.75) * sign(?vx);
+    }
+  }
+
+  @query [mario][bbutton] {
+    acceleration-x: 0.200390625 * ?inputdir;
+
+    @query [mario]:not([skidding]) {
+      velocity-x: min(abs(?vx), 153.75) * sign(?vx);
+    }
+  }
+
+}
+
+[mario][skidding][inputdir=?inputdir] {
+  acceleration-x: 0.365625 * ?inputdir;
+}
+
+[mario][dir=?dir][velocity-x=?vx]:any([dir=1][velocity-x>0],[dir=-1][velocity-x<0]) {
+  @query [mario][noinput] {
+    acceleration-x: -0.1828125 * ?dir;
+  }
+
+  :exit {
+    velocity-x: 0;
+    acceleration-x: 0;
+  }
+}
+
+[mario][inputdir=1] {
+  :enter {
+    flip-horizontal: 1;
+  }
+
+  :exit {
+    flip-horizontal: 0;
+  }
+}
+
+[mario][abutton] {
+  :enter {
+    @query [mario][touching-down] {
+      velocity-y: -240;
+    }
+  }
+}
+
+[mario]:not([touching-down]) {
+  :enter {
+    spritesheet: unset;
+    sprite: "sprites/jump.png";
+  }
+}
+
+[mario]:not([touching-down]) {
+  @query [mario][absolutevelocity-x<16] {
+    acceleration-y: 1.575;
+  }
+
+  @query [mario][absolutevelocity-x<40] {
+    acceleration-y: 1.800;
+  }
+
+  @query [mario][absolutevelocity-x>=40] {
+    acceleration-y: 2.025;
+  }
+
+  @query [mario][abutton][velocity-y=?vy][velocity-y>-270] {
+    @query [mario][absolutevelocity-x<16] {
+//velocity-y: ?vy -  1.125   * $dt;
+      acceleration-y: 0.45;
+    }
+
+    @query [mario][absolutevelocity-x<40] {
+      acceleration-y: 0.421875;
+    }
+
+    @query [mario][absolutevelocity-x>=40] {
+      acceleration-y: 0.5625;
+    }
+  }
+}
+
+[mario][acceleration-x=?ax][velocity-x=?vx] {
+  velocity-x: ?vx + ?ax * $dt;
+}
+
+[mario][acceleration-y=?ay][velocity-y=?vy] {
+  velocity-y: ?vy + ?ay * $dt;
+}
+
+[mario][velocity-y > 270] {
+  velocity-y: 270;
+}
+
+[mario][velocity-y<-270] {
+  velocity-y: -270;
+}

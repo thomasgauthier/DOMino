@@ -17,6 +17,16 @@ public interface ecssListener extends ParseTreeListener {
 	 */
 	void exitProgram(ecssParser.ProgramContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ecssParser#keyframe}.
+	 * @param ctx the parse tree
+	 */
+	void enterKeyframe(ecssParser.KeyframeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ecssParser#keyframe}.
+	 * @param ctx the parse tree
+	 */
+	void exitKeyframe(ecssParser.KeyframeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ecssParser#system}.
 	 * @param ctx the parse tree
 	 */
@@ -196,6 +206,16 @@ public interface ecssListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSystemBody(ecssParser.SystemBodyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ecssParser#statementPlaceHolder}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatementPlaceHolder(ecssParser.StatementPlaceHolderContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ecssParser#statementPlaceHolder}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatementPlaceHolder(ecssParser.StatementPlaceHolderContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link ecssParser#componentStatements}.
 	 * @param ctx the parse tree

@@ -43,9 +43,8 @@ export default {
             }
         }) => void
     }) => {
-
-        const parsed = parser(code);
-
+        const parsed = parser(code)
+        
         if (isOk(parsed)) {
             const { val: program } = parsed;
             const [e, setEvaluate] = useState<() => () => void>(() => () => { })
@@ -77,6 +76,12 @@ export default {
                         return component
                     },
                     componentNameToComponent(name) {
+                        const component = map.get(name) || callables.componentNameToComponent(name);
+
+                        if (component) {
+                            return component
+                        }
+
                         const splitted = name.split('-')
                         return map.get(splitted[0]) || callables.componentNameToComponent(splitted[0]);
                     },
@@ -94,7 +99,7 @@ export default {
                 }
             }
         }
-
-        throw new Error()
+                
+        throw new Error(parsed.err.toString())
     }
 };

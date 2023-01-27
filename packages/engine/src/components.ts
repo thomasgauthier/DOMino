@@ -8,6 +8,11 @@ export const velocity = defineComponent(Vector3)
 export const dimension = defineComponent(Dimensions)
 export const rigidbody = defineComponent({ static: Types.i8 })
 export const sprite = defineComponent({ stringmapid: Types.ui32 })
+export const spriteRepeat = defineComponent({ stringmapid: Types.ui32 })
+export const touchingUp = defineComponent({ is: Types.i32 })
+export const touchingDown = defineComponent({ is: Types.i32 })
+export const touchingLeft = defineComponent({ is: Types.i32 })
+export const touchingRight = defineComponent({ is: Types.i32 })
 export const spritesheet = defineComponent({ stringmapid: Types.ui32 })
 export const frame = defineComponent({ number: Types.ui32 })
 export const collision = defineComponent({ entitiy: Types.eid })
@@ -47,6 +52,11 @@ const Components = {
     dimension,
     rigidbody,
     sprite,
+    'sprite-repeat': spriteRepeat,
+    'touching-up': touchingUp,
+    'touching-down': touchingDown,
+    'touching-left': touchingLeft,
+    'touching-right': touchingRight,
     spritesheet,
     frame,
     collision,

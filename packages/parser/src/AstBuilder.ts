@@ -1,5 +1,5 @@
 import { ParserRuleContext } from "antlr4ts";
-import { ASTNode, BinaryExpression, Block, ComponentSelector, ComponentStatement, Declaration, EventHandler, Identifier, Literal, StringLiteral, Program, BinarySelector, Query, System, ComponentDefinition, Property, AtQuery, CompoundSelector, OperatorArgumentList, FunctionArgumentList, WildcardSelector, Function } from "./ast-types";
+import { ASTNode, BinaryExpression, Block, ComponentSelector, ComponentStatement, Declaration, EventHandler, Identifier, Literal, StringLiteral, Program, BinarySelector, Query, System, ComponentDefinition, Property, AtQuery, CompoundSelector, OperatorArgumentList, FunctionArgumentList, WildcardSelector, Function, Keyframe } from "./ast-types";
 import { AtRuleContext, ComponentIdContext, ComponentSelectorContext, ComponentStatementContext, ComponentStatementsContext, EventHandlerBodyContext, EventHandlerContext, EventHandlerHeaderContext, ExpressionContext, FactorContext, FunctionContext, FunctionParametersContext, IntersectionQueryContext, LiteralContext, MathoperatoradditionsContext, MathoperatorfactorsContext, ProgramContext, QueryContext, QueryExpressionContext, QueryOperationParametersContext, QueryvarContext, SetoperatorContext, StringLiteralContext, SystemBodyContext, SystemContext, SystemHeaderContext, TermContext } from "./antlr/ecssParser";
 import { createOk, Err, Ok } from "option-t/cjs/PlainResult"
 
@@ -26,7 +26,8 @@ export function visitProgram(ctx: ProgramContext): Ok<Program> | Err<any> {
     const program: Program = {
         type: 'Program',
         components: [],
-        systems: []
+        systems: [],
+        keyframes: []
     }
 
     if (ctx.system()) {
@@ -34,6 +35,52 @@ export function visitProgram(ctx: ProgramContext): Ok<Program> | Err<any> {
             if (system.text.length) {
                 program.systems.push(visitSystem(system));
             }
+        }
+    }
+
+    if (ctx.keyframe()) {
+
+        for (let keyframe of ctx.keyframe()) {
+            const from = [];
+            const to = [];
+
+            let inside: 'from' | 'to' | 'none' = 'none'
+            keyframe.children.forEach(c => {
+
+                if (c.text === 'from') {
+                    inside = 'from'
+                }
+
+
+                if (c.text === 'to') {
+                    inside = 'to'
+                }
+
+                if (c instanceof ComponentStatementsContext) {
+
+                    if (inside === 'from') {
+                        const dldl = c.componentStatement().map(cc => visitComponentStatement(cc!))
+                        return from.push(...c.componentStatement().map(cc => visitComponentStatement(cc!)));
+                    }
+
+                    if (inside === 'to') {
+                        return to.push(...c.componentStatement().map(cc => visitComponentStatement(cc!)));
+                    }
+                }
+
+            })
+
+            program.keyframes.push(withLoc<Keyframe>({
+                type: 'Keyframe',
+                from: {
+                    type: 'Block',
+                    children: from
+                },
+                to: {
+                    type: 'Block',
+                    children: to
+                }
+            }, keyframe))
         }
     }
 
@@ -163,6 +210,10 @@ function visitEventHandlerBody(ctx: EventHandlerBodyContext) {
     const children = ctx.children.map(c => {
         if (c instanceof ComponentStatementsContext) {
             return c.componentStatement().map(cc => visitComponentStatement(cc!))
+        }
+
+        if (c instanceof AtRuleContext) {
+            return visitAtRule(c);
         }
     }).flat().filter(c => typeof c != 'undefined');
 
@@ -463,7 +514,7 @@ function visitQueryOperationParameters(ctx: QueryOperationParametersContext): Op
     ctx.queryExpression
     return withLoc<OperatorArgumentList>({
         type: 'OperatorArgumentList',
-        selectors: ctx.children.map(i => i instanceof IntersectionQueryContext ? visitIntersectionQuery(i) : (i instanceof QueryExpressionContext && visitQueryExpresion(i) as CompoundSelector | BinarySelector)).filter(t => typeof t != 'undefined')
+        selectors: ctx.children.map(i => i instanceof IntersectionQueryContext ? visitIntersectionQuery(i) : (i instanceof QueryExpressionContext && visitQueryExpresion(i) as CompoundSelector | BinarySelector)).filter(t => t.type)
     }, ctx)
 }
 

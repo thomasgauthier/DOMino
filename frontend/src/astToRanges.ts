@@ -41,11 +41,7 @@ export default (program: Program) => {
 
     (() => {
         function visit(ast: ASTNode, parent: ASTNode | null = null) {
-
-
-            // cachesonst 
             const keys = Object.keys(ast) as any as (keyof ASTNode)[];
-
 
             keys.forEach(key => {
                 const property = ast[key];

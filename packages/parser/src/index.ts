@@ -53,7 +53,6 @@ export default (code: string): Ok<Program> | Err<[LineColumnInfo, LineColumnInfo
 
         return result;
     } catch (e) {
-        console.warn(e);
         return createErr(errors)
     }
 }

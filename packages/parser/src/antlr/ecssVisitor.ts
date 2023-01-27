@@ -4,6 +4,7 @@
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { ProgramContext } from "./ecssParser";
+import { KeyframeContext } from "./ecssParser";
 import { SystemContext } from "./ecssParser";
 import { SystemHeaderContext } from "./ecssParser";
 import { ComponentSelectorContext } from "./ecssParser";
@@ -22,6 +23,7 @@ import { ComponentAttributeValueContext } from "./ecssParser";
 import { VarContext } from "./ecssParser";
 import { QueryvarContext } from "./ecssParser";
 import { SystemBodyContext } from "./ecssParser";
+import { StatementPlaceHolderContext } from "./ecssParser";
 import { ComponentStatementsContext } from "./ecssParser";
 import { ComponentStatementContext } from "./ecssParser";
 import { FunctionContext } from "./ecssParser";
@@ -70,6 +72,13 @@ export interface ecssVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitProgram?: (ctx: ProgramContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `ecssParser.keyframe`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitKeyframe?: (ctx: KeyframeContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `ecssParser.system`.
@@ -196,6 +205,13 @@ export interface ecssVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitSystemBody?: (ctx: SystemBodyContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `ecssParser.statementPlaceHolder`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStatementPlaceHolder?: (ctx: StatementPlaceHolderContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `ecssParser.componentStatements`.

@@ -2,16 +2,8 @@ html,
 body {
     height: 100vh;
     margin: 0;
-}
-
-.editor-parent {
-    height: 100%;
     overflow-y: hidden;
     overflow-x: hidden;
-}
-
-.yellow-highlight {
-    background-color: yellow;
 }
 
 .main {

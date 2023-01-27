@@ -3,14 +3,7 @@ import engineComponents, { isStringComponent } from "../components"
 import stringmap from "../stringmap";
 
 export const componentStringNameToComponent = (world: IWorld, name: string, components: Map<string, Component>): Component => {
-    const splitted = name.split('-')
-
-    let componentName = name;
-    if (splitted.length > 1) {
-        componentName = splitted[0]
-    }
-
-    return components.get(componentName) || engineComponents[componentName];
+    return components.get(name) || engineComponents[name] || null;
 }
 
 

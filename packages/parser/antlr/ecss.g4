@@ -1,6 +1,11 @@
 grammar ecss;
 
-program: (define+)? system+;
+program: (define+)? (keyframe | system)+;
+
+keyframe:
+	'@keyframes' Identifier '{' 'from' '{' componentStatements '}' (
+		'to' '{' componentStatements '}'
+	)? '}';
 
 system: systemHeader systemBody;
 
@@ -27,8 +32,14 @@ componentAs: (componentId 'as' componentId);
 
 componentAttributes:
 	componentAttribute (COMMA componentAttribute)*;
-componentAttribute: componentId componentAttributeComparator componentAttributeValue;
-componentAttributeComparator: ASSIGN | LESSTHAN | GREATERTHAN | LESSTHANOREQUAL | GREATERTHANOREQUAL;
+componentAttribute:
+	componentId componentAttributeComparator componentAttributeValue;
+componentAttributeComparator:
+	ASSIGN
+	| LESSTHAN
+	| GREATERTHAN
+	| LESSTHANOREQUAL
+	| GREATERTHANOREQUAL;
 componentAttributeValue: NUMBER | Identifier | queryvar;
 
 var: DOLLAR Identifier;
@@ -37,11 +48,19 @@ queryvar: QUESTION Identifier;
 systemBody:
 	LCURLY (componentStatements | atRule | eventHandler)* RCURLY;
 
+statementPlaceHolder: ':' Identifier?;
+
 componentStatements: componentStatement+;
 componentStatement:
-	componentId COLON (expression | function) SEMI;
+	componentId (
+		statementPlaceHolder
+		| ( COLON (expression | function))
+	) SEMI;
+
 function: functionName '(' functionParameters ')';
-functionName: 'max' | 'min' | 'sin' | 'cos' | 'map' | 'abs' | 'sign';
+functionName: Identifier;
+// 'max' | 'min' | 'sin' | 'cos' | 'map' | 'abs' | 'sign';
+
 functionParameters: (
 		expression
 		| function
@@ -121,6 +140,25 @@ TRUE: 'true';
 FALSE: 'false';
 UNSET: 'unset';
 
+Identifier: IdentifierStart IdentifierPart*;
+
+fragment UnicodeEscapeSequence:
+	'u' HexDigit HexDigit HexDigit HexDigit
+	| 'u' '{' HexDigit HexDigit+ '}';
+
+fragment IdentifierPart:
+	IdentifierStart
+	| [\p{Mn}]
+	| [\p{Nd}]
+	| [\p{Pc}]
+	| '\u200C'
+	| '\u200D'
+	| '-';
+
+fragment IdentifierStart: [\p{L}] | '\\' UnicodeEscapeSequence;
+
+
+
 LPAREN: '(';
 RPAREN: ')';
 LBRACKET: '[';
@@ -158,23 +196,6 @@ fragment HexDigit: [_0-9a-fA-F];
 
 EventIdentifier: ':' Identifier;
 AtRuleIdentifier: '@' Identifier;
-
-Identifier: IdentifierStart IdentifierPart*;
-
-fragment UnicodeEscapeSequence:
-	'u' HexDigit HexDigit HexDigit HexDigit
-	| 'u' '{' HexDigit HexDigit+ '}';
-
-fragment IdentifierPart:
-	IdentifierStart
-	| [\p{Mn}]
-	| [\p{Nd}]
-	| [\p{Pc}]
-	| '\u200C'
-	| '\u200D'
-	| '-';
-
-fragment IdentifierStart: [\p{L}] | '\\' UnicodeEscapeSequence;
 
 COMMENT: '//' .*? '\n' -> skip;
 WS: [ \t\r\n]+ -> skip;

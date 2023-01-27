@@ -1,7 +1,14 @@
 export type Program = {
     type: 'Program',
     components: ComponentDefinition[];
-    systems: System[]
+    systems: System[],
+    keyframes: Keyframe[]
+} & ASTNode
+
+export type Keyframe = {
+    type: 'Keyframe',
+    from: Block,
+    to: Block,
 } & ASTNode
 
 export type ComponentDefinition = {
@@ -119,7 +126,7 @@ export type Identifier = {
     name: string
 } & ASTNode
 
-type NodeType = "Program" | "System" | "Block" | "EventHandler" | "ComponentStatement" | "AtQuery" | "ComponentDefinition" | "Property" | "WildcardSelector" | "BinarySelector" | "OperatorArgumentList" | "CompoundSelector" |  "Function" | "FunctionArgumentList" | "Declaration" | "BinaryExpression" | "Literal" | "StringLiteral" | "Query" | "ComponentSelector" | "Identifier";
+type NodeType = "Program" | "System" | "Keyframe" | "Block" | "EventHandler" | "ComponentStatement" | "AtQuery" | "ComponentDefinition" | "Property" | "WildcardSelector" | "BinarySelector" | "OperatorArgumentList" | "CompoundSelector" |  "Function" | "FunctionArgumentList" | "Declaration" | "BinaryExpression" | "Literal" | "StringLiteral" | "Query" | "ComponentSelector" | "Identifier";
 
 export interface ASTNode {
     type: NodeType,

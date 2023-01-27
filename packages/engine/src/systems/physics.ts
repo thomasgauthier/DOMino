@@ -1,6 +1,6 @@
 import { addComponent, defineQuery, hasComponent, IWorld, removeComponent } from "bitecs";
 import { ArcadePhysics } from "arcade-physics"
-import { collision as Collision, dimension as Dimension, position as Position, rigidbody as Rigidbody, velocity as Velocity } from "../components";
+import { collision as Collision, dimension as Dimension, position as Position, rigidbody as Rigidbody, touchingDown, touchingLeft, touchingRight, touchingUp, velocity as Velocity } from "../components";
 
 
 
@@ -8,7 +8,7 @@ export default (world: IWorld, width: number, height: number) => {
     const physics = new ArcadePhysics({
         gravity: {
             x: 0,
-            y: 300
+            y: 0
         },
         width,
         height
@@ -67,7 +67,7 @@ export default (world: IWorld, width: number, height: number) => {
 
 
     let frame = 0;
-    function main(dt: number) {
+    function main(now: number, dt: number) {
         const ents = physicsQuery(world)
 
 
@@ -101,7 +101,7 @@ export default (world: IWorld, width: number, height: number) => {
             }
         }
 
-        physics.world.update(performance.now(), dt)
+        physics.world.update(now, dt)
 
         let seenNow = new Set();
 
@@ -133,6 +133,30 @@ export default (world: IWorld, width: number, height: number) => {
             const body = getBodyFromEid(eid)
 
             if (body) {
+                if (body.touching.up) {
+                    addComponent(world, touchingUp, eid)
+                } else {
+                    removeComponent(world, touchingUp, eid)
+                }
+
+                if (body.touching.down) {
+                    addComponent(world, touchingDown, eid)
+                } else {
+                    removeComponent(world, touchingDown, eid)
+                }
+
+                if (body.touching.left) {
+                    addComponent(world, touchingLeft, eid)
+                } else {
+                    removeComponent(world, touchingLeft, eid)
+                }
+
+                if (body.touching.right) {
+                    addComponent(world, touchingRight, eid)
+                } else {
+                    removeComponent(world, touchingRight, eid)
+                }
+
                 Position.x[eid] = body.x;
                 Position.y[eid] = body.y;
 
